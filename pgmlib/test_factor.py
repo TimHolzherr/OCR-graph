@@ -44,14 +44,20 @@ class TestFactorClass(unittest.TestCase):
 
 class TestFactorModule(unittest.TestCase):
     def setUp(self):
-        self.factorA = Factor(["A", "B", "C"], [2, 3, 2], range(12))
-        self.factorB = Factor(["D", "E", "B"], [2, 2, 3], range(12, 24))
+        self.factorA = Factor(["A", "B", "C"], [2, 3, 2], list(range(12)))
+        self.factorB = Factor(["D", "E", "B"], [2, 2, 3], list(range(12, 24)))
 
     def test_factor_product(self):
         prod = factor.factor_product(self.factorA, self.factorB)
         self.assertEqual( (self.factorA.get_val_of_assigment({"A":1, "B":2, "C":2}) *
         self.factorB.get_val_of_assigment({"D":2, "E":1, "B":2})),
         prod.get_val_of_assigment({"A":1, "B":2, "C":2, "D":2, "E":1}))
+
+    def test_factor_marginalization(self):
+        mar = factor.factor_marginalization(self.factorA, "A")
+        mar2 = factor.factor_marginalization(self.factorA, "C")
+        self.assertTrue(mar._val[0] == 1 and mar._val[1] ==5)
+        self.assertTrue(mar2._val[0] == 6)
 
 if __name__ == '__main__':
     unittest.main()

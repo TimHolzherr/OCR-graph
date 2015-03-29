@@ -95,6 +95,27 @@ def factor_product(factorA, factorB):
         factorC.set_val_of_assigment(a, newval)
     return factorC
 
+def factor_marginalization(factor, variable):
+    """Sums a variable out of a factor
+    """
+    # Check if empty
+    if not factor.var or not variable: return factor
+
+    # Create result factor
+    Cvar = factor.var[:]; Cvar.remove(variable)
+    if not Cvar: raise Exception("Resultant factor has empty scope")
+    Ccard = [factor.card[factor.var.index(v)] for v in Cvar]
+    Cfactor = Factor(Cvar, Ccard)
+
+    # Fill Factor
+    for a in Cfactor.get_all_assigments_d():
+        toset = 0  # Sum over all relevant assigments
+        for x in range(1, factor.card[factor.var.index(variable)] + 1):
+            newd = a
+            newd[variable] = x
+            toset += factor.get_val_of_assigment(newd)
+        Cfactor.set_val_of_assigment(a, toset)
+    return Cfactor
 
 def sanity_check_coomen_var_same_card(factorA, factorB):
     """Checks if the commen variables have the same cardinality"""
