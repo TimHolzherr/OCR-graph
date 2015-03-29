@@ -59,5 +59,12 @@ class TestFactorModule(unittest.TestCase):
         self.assertTrue(mar._val[0] == 1 and mar._val[1] ==5)
         self.assertTrue(mar2._val[0] == 6)
 
+    def test_observe_evidence(self):
+        ev = factor.observe_evidence(self.factorA, ("C", 2))
+        ev2 = factor.observe_evidence(self.factorA, ("B", 3))
+        self.assertEqual(list(ev._val), [6, 7, 8, 9, 10, 11])
+        self.assertEqual(list(ev2._val), [4, 5, 10, 11])
+
+
 if __name__ == '__main__':
     unittest.main()

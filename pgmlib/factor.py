@@ -117,6 +117,26 @@ def factor_marginalization(factor, variable):
         Cfactor.set_val_of_assigment(a, toset)
     return Cfactor
 
+def observe_evidence(factor, evidence):
+    """Modify a factor such that it is consistent with the observed evidence
+    Evidence is a tubple (variable, value)
+    """
+    # Check if empty
+    if not factor.var or not evidence[0] in factor.var: return factor
+
+    # Create result factor
+    Cvar = factor.var[:]; Cvar.remove(evidence[0])
+    if not Cvar: raise Exception("Resultant factor has empty scope")
+    Ccard = [factor.card[factor.var.index(v)] for v in Cvar]
+    Cfactor = Factor(Cvar, Ccard)
+
+    # Fill Factor
+    for a in Cfactor.get_all_assigments_d():
+        newd = a
+        newd[evidence[0]] = evidence[1]
+        Cfactor.set_val_of_assigment(a, factor.get_val_of_assigment(newd))
+    return Cfactor
+
 def sanity_check_coomen_var_same_card(factorA, factorB):
     """Checks if the commen variables have the same cardinality"""
     if not np.intersect1d(factorA.var, factorB.var):
