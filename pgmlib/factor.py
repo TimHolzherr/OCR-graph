@@ -137,6 +137,14 @@ def observe_evidence(factor, evidence):
         Cfactor.set_val_of_assigment(a, factor.get_val_of_assigment(newd))
     return Cfactor
 
+def compute_joint_distribution(factor_list):
+    # Check if empty
+    if not factor_list: return Factor([],[])
+    return reduce(factor_product, factor_list)
+
+
+
+
 def sanity_check_coomen_var_same_card(factorA, factorB):
     """Checks if the commen variables have the same cardinality"""
     if not np.intersect1d(factorA.var, factorB.var):
