@@ -20,7 +20,10 @@ class Factor:
         """
         self.var = var
         self.card = card
-        self._val = val or np.zeros(reduce(mul, card), dtype=np.int16)
+        if val == None:
+            self._val = np.zeros(reduce(mul, card), dtype=np.float)
+        else:
+            self._val = val
 
 
     def get_val_of_assigment(self, assigment):
