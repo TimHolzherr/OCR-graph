@@ -2,6 +2,7 @@
 """
 import numpy as np
 from pgmlib.factor import Factor
+from pgmlib.inference import map_simple
 
 
 LETTERES_IN_ALPHABET = 26
@@ -24,11 +25,22 @@ def compute_singleton_factors(images, model):
     return factors
 
 
+def construct_network(images, model):
+    """Constructs OCR network for a word, runs interference and returns result
+    images: list of images
+    model: model which applies each letter a probability given the image
+    """
+    factors = compute_singleton_factors(images, model)
+    # TODO: compute pairwise factores etc
+    return map_simple(factors)
+
+
 def main():
     import data_processing
     words = data_processing.read_PA3Data()
     model = data_processing.train_logreg_model(words[1:])
-    singelton = compute_singleton_factors([l[0] for l in words[0]], model)
+    result = construct_network([l[0] for l in words[0]], model)
+    #singelton = compute_singleton_factors([l[0] for l in words[0]], model)
     pass
 
 
