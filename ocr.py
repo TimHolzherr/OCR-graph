@@ -29,10 +29,11 @@ def construct_network(images, model):
     """Constructs OCR network for a word, runs interference and returns result
     images: list of images
     model: model which applies each letter a probability given the image
+    Returns Words as a list of chars
     """
     factors = compute_singleton_factors(images, model)
     # TODO: compute pairwise factores etc
-    return map_simple(factors)
+    return [c[1] for c in  map_simple(factors)]
 
 
 def main():
