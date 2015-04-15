@@ -2,7 +2,8 @@
 """
 import numpy as np
 from pgmlib.factor import Factor
-from pgmlib.inference import map_simple
+from inference import map_singelton_ocr
+from inference import compute_exact_marginals_ocr_clique_tree
 
 
 LETTERES_IN_ALPHABET = 26
@@ -24,16 +25,33 @@ def compute_singleton_factors(images, model):
         factors.append(f)
     return factors
 
+def compute_pairwise_factors(letters_in_word, pairwise_model):
+    """Computes the n-1 pairwsie factors which assign a probability to the
+    apearence of two subsequent letters.
+    """
+    factors = []
+    for var_name in range(1, letters_in_word):
+        f = Factor([str(var_name), str(var_name + 1)], [26, 26])
+        for i in range(26):
+            for j in range(26):
+                # add small number such that we do not have zeros
+                f.set_val_of_assigment({str(var_name): i + 1, str(var_name+1): j + 1}, pairwise_model[i, j])
+        factors.append(f)
+    return factors
 
-def construct_network(images, model):
+def construct_network(images, logistig_model, pairwise_model = None):
     """Constructs OCR network for a word, runs interference and returns result
     images: list of images
-    model: model which applies each letter a probability given the image
+    logistig_model: model which applies each letter a probability given the image
     Returns Words as a list of chars
     """
-    factors = compute_singleton_factors(images, model)
-    # TODO: compute pairwise factores etc
-    return [c[1] for c in  map_simple(factors)]
+    print('.', end="")
+    factors = compute_singleton_factors(images, logistig_model)
+    if not pairwise_model is None:
+        pairwise = compute_pairwise_factors(len(images), pairwise_model)
+        mar = compute_exact_marginals_ocr_clique_tree(factors, pairwise)
+        return map_singelton_ocr(mar)
+    return map_singelton_ocr(factors)
 
 
 def main():

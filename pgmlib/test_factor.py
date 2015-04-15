@@ -59,6 +59,12 @@ class TestFactorModule(unittest.TestCase):
         self.assertTrue(mar._val[0] == 1 and mar._val[1] ==5)
         self.assertTrue(mar2._val[0] == 6)
 
+    def test_factor_marginalization_max(self):
+        mar = factor.factor_marginalization(self.factorA, "A", max)
+        mar2 = factor.factor_marginalization(self.factorA, "C", max)
+        self.assertTrue(mar._val[0] == 1 and mar._val[1] ==3)
+        self.assertTrue(mar2._val[0] == 6)
+
     def test_observe_evidence(self):
         ev = factor.observe_evidence(self.factorA, ("C", 2))
         ev2 = factor.observe_evidence(self.factorA, ("B", 3))

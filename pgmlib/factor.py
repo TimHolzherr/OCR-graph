@@ -3,6 +3,8 @@
 import numpy as np
 from operator import mul
 from functools import reduce
+from operator import mul
+from operator import add
 
 class Factor:
     """The nodes in a Bayesian/Markov network are represented by Factors.
@@ -20,10 +22,8 @@ class Factor:
         """
         self.var = var
         self.card = card
-        if val == None:
-            self._val = np.zeros(reduce(mul, card), dtype=np.float)
-        else:
-            self._val = val
+        if val is None: self._val = np.zeros(reduce(mul, card), dtype=np.float)
+        else: self._val = val
 
 
     def get_val_of_assigment(self, assigment):
@@ -75,8 +75,10 @@ class Factor:
             index = index // c # alt: (index - (index % b)) / b
         return assigment
 
-def factor_product(factorA, factorB):
+def factor_product(factorA, factorB, operator=mul):
     """ Computes the factor product of two factors
+        the parameter operator allows to make an other operation instead of
+        multiplication, eg. add if one operats in log space
     """
     # CHeck if empty
     if len(factorA.var) == 0: return factorB
@@ -89,34 +91,40 @@ def factor_product(factorA, factorB):
     Cvar, Ccard = zip(*sorted(list(
                     set(zip(factorA.var, factorA.card)).union(
                     set(zip( factorB.var, factorB.card))))))
-    factorC = Factor(Cvar, Ccard)
+    factorC = Factor(list(Cvar), list(Ccard))
 
     # Fill Factor
     assignments = factorC.get_all_assigments_d()
     for a in assignments:
-        newval = factorA.get_val_of_assigment(a) * factorB.get_val_of_assigment(a)
+        newval = operator(factorA.get_val_of_assigment(a), factorB.get_val_of_assigment(a))
         factorC.set_val_of_assigment(a, newval)
     return factorC
 
-def factor_marginalization(factor, variable):
+
+def factor_marginalization(factor, variable, operator=add):
     """Sums a variable out of a factor
+       With the operator parameter one can change the marginalisation
+       to a maximisation in case of calculating map assigment in log space
     """
     # Check if empty
     if not factor.var or not variable: return factor
 
     # Create result factor
     Cvar = factor.var[:]; Cvar.remove(variable)
-    if not Cvar: raise Exception("Resultant factor has empty scope")
+    if not Cvar:
+        return Factor([],[], [])
+        #raise Exception("Resultant factor has empty scope")
     Ccard = [factor.card[factor.var.index(v)] for v in Cvar]
     Cfactor = Factor(Cvar, Ccard)
 
     # Fill Factor
     for a in Cfactor.get_all_assigments_d():
-        toset = 0  # Sum over all relevant assigments
+        # UGLY, TODO: REFACTOR!!!!
+        toset = 0 if operator == add else -np.inf  # Sum over all relevant assigments
         for x in range(1, factor.card[factor.var.index(variable)] + 1):
             newd = a
             newd[variable] = x
-            toset += factor.get_val_of_assigment(newd)
+            toset = operator(toset, factor.get_val_of_assigment(newd))
         Cfactor.set_val_of_assigment(a, toset)
     return Cfactor
 

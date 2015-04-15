@@ -22,6 +22,15 @@ def read_PA3Data(file='PA3Data.mat'):
                 for word in raw_data]
     return words
 
+def read_PA3Models_pairwise(file="PA3Models.mat"):
+    """Reads matlab data file containing the probability that two letters apear
+    together.
+    Returns a 2darray containing these probabilitys"""
+    # Set path to location of current python file
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    # load an preprocess data
+    return scipy.io.loadmat(file)["pairwiseModel"]
+
 def train_logreg_model(words):
     """Trains a logistig regression model to make the assigment between the
     image of letters to the actual character.
