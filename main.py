@@ -18,7 +18,7 @@ def main():
     pairwise_model =  data_processing.read_PA3Models_pairwise()
 
     # Predict test words
-    precition = [ocr.construct_network([l[0] for l in word], logistig_model, pairwise_model)
+    precition = [ocr.construct_network([l[0] for l in word], logistig_model, None)
                  for word in test_words]
 
     # Calculate Scores

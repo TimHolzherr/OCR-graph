@@ -35,7 +35,7 @@ def compute_pairwise_factors(letters_in_word, pairwise_model):
         for i in range(26):
             for j in range(26):
                 # add small number such that we do not have zeros
-                f.set_val_of_assigment({str(var_name): i + 1, str(var_name+1): j + 1}, pairwise_model[i, j])
+                f.set_val_of_assigment({str(var_name): i + 1, str(var_name+1): j + 1}, pairwise_model[i, j] )
         factors.append(f)
     return factors
 
@@ -49,7 +49,7 @@ def construct_network(images, logistig_model, pairwise_model = None):
     factors = compute_singleton_factors(images, logistig_model)
     if not pairwise_model is None:
         pairwise = compute_pairwise_factors(len(images), pairwise_model)
-        mar = compute_exact_marginals_ocr_clique_tree(factors, pairwise)
+        mar = compute_exact_marginals_ocr_clique_tree(factors + pairwise)
         return map_singelton_ocr(mar)
     return map_singelton_ocr(factors)
 
