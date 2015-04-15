@@ -29,6 +29,10 @@ class TestExactMarginals(unittest.TestCase):
         self.factor1 = Factor(["1"], [2], np.array([0.2, 0.8]))
         self.factor2 = Factor(["2"], [2], np.array([0.1, 0.9]))
         self.pair1 = Factor(["1", "2"], [2, 2], np.array([0.99, 0.01, 0.01, 0.01]))
+        self.factor3 = Factor(["3"], [2], np.array([0.91, 0.09]))
+        self.factor4 = Factor(["4"], [2], np.array([0.81, 0.19]))
+        self.pair2 = Factor(["2", "3"], [2, 2], np.array([0.5, 0.01, 0.01, 0.05]))
+        self.pair3 = Factor(["3", "4"], [2, 2], np.array([0.01, 0.01, 0.01, 0.99]))
 
     def test_c_e_m_o_c_t(self):
         marginals = compute_exact_marginals_ocr_clique_tree(
@@ -45,8 +49,15 @@ class TestExactMarginals(unittest.TestCase):
         for a, b in zip(marginals[1]._val.tolist(), two._val.tolist()):
             self.assertAlmostEqual(a,b)
 
-    def test_integration1(self):
+    def test_binary_factors_small(self):
         cliques = [self.factor1, self.factor2, self.pair1]
+        edges = _compute_edges(cliques)
+        tree = CliqueTree(cliques, edges)
+        tree.calibrate()
+        self.assertTrue(test_convergence(tree.cliqueList))
+
+    def test_binary_factors_3(self):
+        cliques = [self.factor1, self.factor2, self.factor3, self.pair1, self.pair2]
         edges = _compute_edges(cliques)
         tree = CliqueTree(cliques, edges)
         tree.calibrate()

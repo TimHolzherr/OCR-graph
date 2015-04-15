@@ -10,10 +10,10 @@ from pgmlib.factor import factor_marginalization
 from pgmlib import inference
 
 def _compute_edges(cliques):
-    edges = np.zeros((len(cliques), len(cliques)))
+    edges = np.diag([1] *len(cliques))
     for i in range(len(cliques)):
         for j in range(len(cliques)):
-            if set(cliques[i].var).intersection(set(cliques[j].var)):
+            if set(cliques[i].var).intersection(set(cliques[j].var)) and not len(cliques[i].var) == len(cliques[j].var):
                 edges[i, j] = 1
     return edges
 
@@ -29,9 +29,6 @@ def compute_exact_marginals_ocr_clique_tree(cliques, max_sum=True):
     tree = inference.CliqueTree(cliques, edges)
     tree.calibrate(max_sum)
 
-    # Test convergnce
-    #test_convergence(tree.cliqueList)
-
     # Compute Marginals
     return _compute_marginals(tree.cliqueList)
 
@@ -46,21 +43,6 @@ def _compute_marginals(cliques):
             marginals.append(marg)
             break
     return marginals
-
-def test_convergence(cliques):
-    for var in sorted({v for f in cliques for v in f.var}):
-        marginals = []
-        for clique in (c for c in cliques if var in c.var):
-            marg = copy.deepcopy(clique)
-            for other_var in [v for v in clique.var if not v == var]:
-                marg = factor_marginalization(marg, other_var)
-            marginals.append(marg)
-        for m1, m2 in zip(marginals[:-1], marginals[1:]):
-            for a, b in zip(m1._val.flatten().tolist(), m2._val.flatten().tolist()):
-                if not a == b:
-                    raise Exception("Not converged!")
-
-
 
 def map_singelton_ocr(factors):
     """Takes a list of factors reduced to only one variable and returns the most
