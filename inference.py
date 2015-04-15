@@ -2,39 +2,65 @@
 """
 import numpy as np
 from operator import add
+import copy
 
 from pgmlib import factor
 from pgmlib.factor import factor_product
 from pgmlib.factor import factor_marginalization
 from pgmlib import inference
 
-
-def compute_exact_marginals_ocr_clique_tree(singelton_factors, picewise_factors):
-    """Computes exact marginals using a clique tree
-    Algorithem depends on order of singelton and piecwise factors
-    """
-    cliques = singelton_factors + picewise_factors
+def _compute_edges(cliques):
     edges = np.zeros((len(cliques), len(cliques)))
     for i in range(len(cliques)):
         for j in range(len(cliques)):
             if set(cliques[i].var).intersection(set(cliques[j].var)):
                 edges[i, j] = 1
+    return edges
+
+
+def compute_exact_marginals_ocr_clique_tree(cliques, max_sum=True):
+    """Computes exact marginals using a clique tree
+    Algorithem depends on order of singelton and piecwise factors
+    """
+    #compute edges
+    edges = _compute_edges(cliques)
 
     # Calibrate Tree
     tree = inference.CliqueTree(cliques, edges)
-    tree.calibrate(True)
+    tree.calibrate(max_sum)
+
+    # Test convergnce
+    #test_convergence(tree.cliqueList)
 
     # Compute Marginals
+    return _compute_marginals(tree.cliqueList)
+
+
+def _compute_marginals(cliques):
     marginals = []
-    for v in sorted({v for f in cliques for v in f.var}):
-        for clique in (c for c in tree.cliqueList if v in c.var):
-            other_vars =[va for va in clique.var if not va == v]
-            marg = factor_marginalization(clique, other_vars[0] if other_vars else None, max)
-            for other_var in other_vars[1:]:
+    for var in sorted({v for f in cliques for v in f.var}):
+        for clique in (c for c in cliques if var in c.var):
+            marg = copy.deepcopy(clique)
+            for other_var in [v for v in clique.var if not v == var]:
                 marg = factor_marginalization(marg, other_var, max)
             marginals.append(marg)
             break
     return marginals
+
+def test_convergence(cliques):
+    for var in sorted({v for f in cliques for v in f.var}):
+        marginals = []
+        for clique in (c for c in cliques if var in c.var):
+            marg = copy.deepcopy(clique)
+            for other_var in [v for v in clique.var if not v == var]:
+                marg = factor_marginalization(marg, other_var)
+            marginals.append(marg)
+        for m1, m2 in zip(marginals[:-1], marginals[1:]):
+            for a, b in zip(m1._val.flatten().tolist(), m2._val.flatten().tolist()):
+                if not a == b:
+                    raise Exception("Not converged!")
+
+
 
 def map_singelton_ocr(factors):
     """Takes a list of factors reduced to only one variable and returns the most
