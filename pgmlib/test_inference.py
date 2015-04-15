@@ -55,6 +55,10 @@ class TestCliqueTree(unittest.TestCase):
     def test_calibrate_max_sum(self):
         self.tree1.calibrate(True)
         res = map_singelton(self.tree1.cliqueList[:-1])
+
+        self.factor1._val = np.log(self.factor1._val)
+        self.factor2._val = np.log(self.factor2._val)
+        self.pair1._val = np.log(self.pair1._val)
         comined = factor.factor_product(self.factor2,
                                 factor.factor_product(self.factor1, self.pair1, add), add)
         one = factor.factor_marginalization(comined, "2", max)
