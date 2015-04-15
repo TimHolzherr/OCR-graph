@@ -28,6 +28,9 @@ class TestExactMarginals(unittest.TestCase):
     def test_c_e_m_o_c_t(self):
         marginals = compute_exact_marginals_ocr_clique_tree(
                                     [self.factor1, self.factor2], [self.pair1])
+        self.factor1._val = np.log(self.factor1._val)
+        self.factor2._val = np.log(self.factor2._val)
+        self.pair1._val = np.log(self.pair1._val)
         comined = factor.factor_product(self.factor2,
                     factor.factor_product(self.factor1, self.pair1, add), add)
         one = factor.factor_marginalization(comined, "2", max)

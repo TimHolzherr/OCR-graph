@@ -71,5 +71,37 @@ class TestCliqueTree(unittest.TestCase):
                         comined._val.flatten().tolist()):
             self.assertAlmostEqual(a,b)
 
+
+class TestCliqueTreeExtended(unittest.TestCase):
+    def setUp(self):
+        # two singelton and one pair
+        self.factor0 = Factor(["1"], [2], np.array([0.2, 0.8]))
+        self.factor1 = Factor(["2"], [2], np.array([0.1, 0.9]))
+        self.factor2 = Factor(["3"], [2], np.array([0.91, 0.09]))
+        self.factor3 = Factor(["4"], [2], np.array([0.81, 0.19]))
+        self.pair4 = Factor(["1", "2"], [2, 2], np.array([0.99, 0.01, 0.01, 0.01]))
+        self.pair5 = Factor(["2", "3"], [2, 2], np.array([0.5, 0.01, 0.01, 0.05]))
+        self.pair6 = Factor(["3", "4"], [2, 2], np.array([0.01, 0.01, 0.01, 0.99]))
+        edges = np.diag([1]*7)
+        edges[0, 4] = 1; edges[1, 4] = 1; edges[1, 5] = 1; edges[2, 5] = 1;
+        edges[2, 6] = 1; edges[3, 6] = 1; edges[4, 0] = 1; edges[4, 1] = 1;
+        edges[5, 1] = 1; edges[5, 2] = 1; edges[6, 2] = 1; edges[6, 3] = 1;
+        self.tree1 = CliqueTree([self.factor0, self.factor1, self.factor2,
+                                 self.factor3, self.pair4, self.pair5,
+                                 self.pair6], edges)
+
+    def test_calibrate(self):
+        self.tree1.calibrate()
+        one = factor.factor_marginalization(self.tree1.cliqueList[4], "2")
+        three1 = factor.factor_marginalization(self.tree1.cliqueList[5], "2")
+        three2 = factor.factor_marginalization(self.tree1.cliqueList[6], "4")
+        for a, b in zip(self.tree1.cliqueList[0]._val.tolist(), one._val.tolist()):
+            self.assertAlmostEqual(a,b)
+        for a, b in zip(self.tree1.cliqueList[2]._val.tolist(), three1._val.tolist()):
+            self.assertAlmostEqual(a,b)
+        for a, b in zip(self.tree1.cliqueList[2]._val.tolist(), three2._val.tolist()):
+            self.assertAlmostEqual(a,b)
+
+
 if __name__ == '__main__':
     unittest.main()
