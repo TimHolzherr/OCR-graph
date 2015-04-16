@@ -27,7 +27,7 @@ def compute_exact_marginals_ocr_clique_tree(cliques, max_sum=True):
 
     # Calibrate Tree
     tree = inference.CliqueTree(cliques, edges)
-    tree.calibrate(max_sum)
+    tree.calibrate()#max_sum)
 
     # Compute Marginals
     return _compute_marginals(tree.cliqueList)

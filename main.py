@@ -18,13 +18,24 @@ def main():
     pairwise_model =  data_processing.read_PA3Models_pairwise()
 
     # Predict test words
-    precition = [ocr.construct_network([l[0] for l in word], logistig_model, None)
+    precition = [ocr.construct_network([l[0] for l in word], logistig_model, pairwise_model)
                  for word in test_words]
 
     # Calculate Scores
     print("Score for words: ", score(precition, [[l[1] for l in word] for word in test_words]))
     print("Score for letters: ", score([l for word in precition for l in word],
                                     [l[1] for word in test_words for l in word]))
+
+
+##import numpy as np
+##def gen_custom_pairwise(letters):
+##    mod = np.zeros((26,26))
+##    letter_pair = list(zip(letters[1:], letters[:-1]))
+##    for i in range(26):
+##        for j in range(26):
+##            mod[i, j] = letter_pair.count(( chr(i + ord("a")), chr(j + ord("a")) ))
+##    return mod +  0.1
+##pairwise_model = gen_custom_pairwise([l[1] for word in test_words for l in word])
 
 if __name__ == '__main__':
     main()
